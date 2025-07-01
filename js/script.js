@@ -1,201 +1,241 @@
-// elements
-const notesContainer = document.querySelector("#notes-container");
-const noteInput = document.querySelector("#note-content");
-const addNoteBtn = document.querySelector(".add-note");
+//imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBvZL7H3UgC_HZkdN29SlVpYdf7Bj00VtY",
+  authDomain: "tasklist-f13ff.firebaseapp.com",
+  projectId: "tasklist-f13ff",
+  storageBucket: "tasklist-f13ff.firebasestorage.app",
+  messagingSenderId: "351884158337",
+  appId: "1:351884158337:web:419368ac05d3a692147480",
+};
+
+// Firebase e Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// search tasks
 const searchInput = document.querySelector("#search-input");
-
-const exportBtn = document.querySelector("#export-notes");
-
-// function
-function showNotes() {
-  cleanNotes();
-  getNotes().forEach((note) => {
-    const noteElement = createNote(note.id, note.content, note.fixed);
-    notesContainer.appendChild(noteElement);
-  });
-}
-
-function cleanNotes() {
-  notesContainer.replaceChildren([]);
-}
-
-function addNote() {
-  const notes = getNotes();
-  const noteObject = {
-    id: genereteId(),
-    content: noteInput.value,
-    fixed: false,
-  };
-
-  const noteElement = createNote(noteObject.id, noteObject.content);
-
-  notesContainer.appendChild(noteElement);
-
-  notes.push(noteObject);
-
-  saveNotes(notes);
-  noteInput.value = "";
-}
-
-function genereteId() {
-  return Math.floor(Math.random() * 5000);
-}
-
-function createNote(id, content, fixed) {
-  const element = document.createElement("div");
-  element.classList.add("note");
-  const textArea = document.createElement("textarea");
-  textArea.value = content;
-  textArea.placeholder = "Adicione algum texto";
-  textArea.addEventListener("keyup", (e) => {
-    updateNote(id, e.target.value);
-  });
-  element.appendChild(textArea);
-
-  const pinIcon = document.createElement("i");
-  pinIcon.classList.add(...["bi", "bi-pin"]);
-  element.appendChild(pinIcon);
-
-  const deleteIcon = document.createElement("i");
-  deleteIcon.classList.add(...["bi", "bi-x-lg"]);
-  element.appendChild(deleteIcon);
-
-  const duplicateIcon = document.createElement("i");
-  duplicateIcon.classList.add(...["bi", "bi-file-earmark-plus"]);
-  element.appendChild(duplicateIcon);
-
-  if (fixed) {
-    element.classList.add("fixed");
+searchInput.addEventListener("keyup", (e) => {
+  if (searchInput.value.trim() === "") {
+    showTask();
   }
-  //element events
-  element.querySelector(".bi-pin").addEventListener("click", () => {
-    toggleFixNote(id);
-  });
+  searchTask(searchInput.value);
+});
 
-  element.querySelector(".bi-x-lg").addEventListener("click", () => {
-    deleteNote(id, element);
-  });
+// export tasks
+const exportBtn = document.querySelector("#export-tasks");
+exportBtn.addEventListener("click", () => exportTasks());
 
-  element
-    .querySelector(".bi-file-earmark-plus")
-    .addEventListener("click", () => {
-      copyNote(id);
-    });
+// collection ref
+const taskRef = collection(db, "tasks");
 
-  return element;
-}
-
-function toggleFixNote(id) {
-  const notes = getNotes();
-  const targetNote = notes.filter((note) => note.id === id)[0];
-  targetNote.fixed = !targetNote.fixed;
-  saveNotes(notes);
-  showNotes();
-}
-
-function deleteNote(id, element) {
-  const notes = getNotes();
-  const filteredNotes = notes.filter((notes) => notes.id !== id);
-  saveNotes(filteredNotes);
-  element.remove();
-}
-
-function copyNote(id) {
-  const notes = getNotes();
-  const targetNote = notes.find((notes) => notes.id === id);
-
-  const duplicateNote = {
-    id: genereteId(),
-    content: targetNote.content,
-    fixed: targetNote.fixed,
-  };
-
-  notes.push(duplicateNote);
-  saveNotes(notes);
-  showNotes();
-}
-
-// local storage
-function getNotes() {
-  let notes = [];
+// Save tasks
+async function saveTask(task) {
   try {
-    const storedNotes = JSON.parse(localStorage.getItem("notes") || "[]");
-    if (Array.isArray(storedNotes)) {
-      notes = storedNotes;
+    await addDoc(taskRef, {
+      content: task.content,
+      fixed: task.fixed,
+      criadoEm: new Date(),
+    });
+    showTask();
+    showToast("Tarefa adicionada com sucesso");
+  } catch (e) {
+    showToast("Erro ao adicionar tarefa");
+    console.error(e);
+  }
+}
+
+// Show
+async function showTask() {
+  const q = query(taskRef, orderBy("fixed", "desc"));
+  const querySnapshot = await getDocs(q);
+
+  renderTask(querySnapshot);
+}
+
+function renderTask(querySnapshot) {
+  try {
+    const container = document.getElementById("task-container");
+    container.innerHTML = "";
+    querySnapshot.forEach((doc) => {
+      const task = doc.data();
+      const id = doc.id;
+      const div = document.createElement("div");
+      div.className = "task";
+      div.textContent = task.content;
+      container.appendChild(div);
+
+      if (task.fixed) {
+        div.classList.add("fixed");
+      }
+
+      // pin icon
+      div.appendChild(
+        createIcon("bi-pin", () => toggleTaskFixation(id), "Fixar nota")
+      );
+      // delete icon
+      div.appendChild(
+        createIcon("bi-x-lg", () => deleteTask(id), "Deletar nota")
+      );
+      // copy icon
+      div.appendChild(
+        createIcon("bi-file-earmark-plus", () => copyTask(id), "Fixar nota")
+      );
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+const createIcon = (className, onClick, arialLabel = "") => {
+  const icon = document.createElement("i");
+  icon.classList.add("bi", className);
+  icon.addEventListener("click", onClick);
+  icon.setAttribute("arial-label", arialLabel);
+  return icon;
+};
+
+// Event listeners
+document.querySelector(".add-task").addEventListener("click", handleTaskAdd);
+
+document.getElementById("task-content").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    handleTaskAdd();
+  }
+});
+
+async function handleTaskAdd() {
+  const input = document.getElementById("task-content");
+  const content = input.value.trim();
+
+  if (content !== "") {
+    const task = {
+      content: content,
+      fixed: false,
+    };
+    await saveTask(task);
+    input.value = "";
+    await showTask();
+  }
+}
+
+async function deleteTask(id) {
+  try {
+    await deleteDoc(doc(db, "tasks", id));
+    showTask();
+    showToast("Tarefa excluída");
+  } catch (e) {
+    showToast("Erro ao deletar tarefa");
+    console.error(e);
+  }
+}
+
+async function copyTask(id) {
+  try {
+    const docRef = doc(db, "tasks", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      await addDoc(taskRef, {
+        content: data.content,
+        fixed: data.fixed,
+        criadoEm: new Date(),
+      });
+      showTask();
+      showToast("Tarefa duplicada");
     }
   } catch (e) {
-    console.warn("Erro ao ler notas do localStorage", e);
+    console.error("Erro:", e);
   }
-  const orderedNotes = notes.sort((a, b) => (a.fixed > b.fixed ? -1 : 1));
-  return orderedNotes;
 }
 
-function saveNotes(notes) {
-  localStorage.setItem("notes", JSON.stringify(notes));
+async function toggleTaskFixation(id) {
+  try {
+    const docRef = doc(db, "tasks", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const newValue = !data.fixed;
+
+      await updateDoc(docRef, {
+        fixed: newValue,
+      });
+    }
+
+    showTask();
+    showToast("Tarefa fixada");
+  } catch (e) {
+    showToast("Erro ao fixar tarefa");
+    console.log(e);
+  }
 }
 
-function updateNote(id, newContent) {
-  const notes = getNotes();
-  const targetNote = notes.filter((note) => note.id === id)[0];
-  targetNote.content = newContent;
-  saveNotes(notes);
-  console.log(newContent);
-}
+async function searchTask(text) {
+  try {
+    const q = query(collection(db, "tasks"), orderBy("fixed", "desc"));
+    const tasks = await getDocs(q);
 
-function searchNotes(search) {
-  const searchResults = getNotes().filter((note) =>
-    note.content.includes(search)
-  );
-
-  if (search !== "") {
-    cleanNotes();
-
-    searchResults.forEach((note) => {
-      const noteElement = createNote(note.id, note.content);
-      notesContainer.appendChild(noteElement);
+    const filteredTasks = tasks.docs.filter((doc) => {
+      const data = doc.data();
+      return data.content.toLowerCase().includes(text.toLowerCase());
     });
 
-    return;
+    renderTask(filteredTasks);
+  } catch (e) {
+    console.log("Erro ao buscar tarefas: " + e);
   }
-
-  cleanNotes();
-  showNotes();
 }
 
-function exportData() {
-  const notes = getNotes();
+async function exportTasks() {
+  try {
+    const q = query(taskRef);
+    const tasks = await getDocs(q);
 
-  const csvString = [
-    ["ID", "Conteúdo", "Fixado?"],
-    ...notes.map((note) => [note.id, note.content, note.fixed]),
-  ]
-    .map((e) => e.join(","))
-    .join("\n");
+    const csvString = [
+      ["Conteúdo", "Fixado?"],
+      ...tasks.docs.map((task) => [task.data().content, task.data().fixed]),
+    ]
+      .map((e) => e.join(","))
+      .join("\n");
 
-  const element = document.createElement("a");
-  element.href = "data:text/csv;charset=utf-8" + encodeURI(csvString);
+    const element = document.createElement("a");
+    element.href = "data:text/csv;charset=utf-8" + encodeURI(csvString);
 
-  element.target = "_blank";
-  element.download = "notes.csv";
-  element.click();
+    element.target = "_blank";
+    element.download = "tasks.csv";
+    element.click();
+  } catch (e) {
+    console.log("Erro ao exportar dados: " + e);
+  }
 }
 
-// events
-addNoteBtn.addEventListener("click", () => addNote());
-searchInput.addEventListener("keyup", (e) => {
-  const search = e.target.value;
-  searchNotes(search);
-});
+const showToast = (message) => {
+  const container = document.querySelector("#toast-container");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  container.appendChild(toast);
 
-noteInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    addNote();
-  }
-});
+  setTimeout(() => {
+    container.removeChild(toast);
+  }, 3000);
+};
 
-exportBtn.addEventListener("click", () => {
-  exportData();
-});
-
-// inicialização
-showNotes();
+// start
+window.addEventListener("DOMContentLoaded", showTask);

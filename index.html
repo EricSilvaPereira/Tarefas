@@ -1,34 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- bootstrap icons -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css
+"
     />
     <!-- styles -->
     <link rel="stylesheet" href="css/style.css" />
     <!-- scripts -->
-    <script src="js/script.js" defer></script>
-    <title>DevNotes</title>
+    <script type="module" src="js/script.js"></script>
+    <title>TAREFAS</title>
   </head>
   <body>
     <header>
-      <h1>DevNotes</h1>
+      <h1>TAREFAS</h1>
       <div id="search-container">
         <i class="bi bi-search"></i>
         <input type="text" id="search-input" placeholder="Busque uma nota" />
       </div>
-      <button id="export-notes">
+      <button id="export-tasks">
         Exportar CSV <i class="bi bi-download"></i>
       </button>
     </header>
-    <div id="add-note-container">
-      <input type="text" id="note-content" placeholder="O que deseja anotar?" />
-      <button class="add-note"><i class="bi bi-plus-lg"></i></button>
+    <div id="add-task-container">
+      <input type="text" id="task-content" placeholder="O que deseja anotar?" />
+      <button class="add-task" aria-label="Adicionar tarefa">
+        <i class="bi bi-plus-lg"></i>
+      </button>
     </div>
-    <div id="notes-container"></div>
+    <main>
+      <div id="task-container"></div>
+    </main>
+    <id id="toast-container"></id>
   </body>
 </html>

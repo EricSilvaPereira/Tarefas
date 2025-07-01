@@ -1,44 +1,38 @@
-# 🗒️ DevNotes
+# 📋 TAREFAS
 
-Projeto **DevNotes** — uma aplicação web simples para criação, edição, fixação e remoção de anotações.  
-Desenvolvido com **HTML**, **CSS** e **JavaScript**, como parte dos meus estudos em desenvolvimento front-end.
+Projeto de lista de tarefas com funcionalidades completas, utilizando **JavaScript** e **Firebase (Firestore)** para persistência de dados em nuvem.
 
-## 🚀 Funcionalidades
+## ✨ Funcionalidades
 
-- ✅ Criar novas notas
-- ✅ Fixar/desfixar notas importantes
-- ✅ Remover notas
-- ✅ Duplicar anotações
-- ✅ Armazenamento local com `localStorage`
-- ✅ Layout responsivo usando CSS Grid
-
-## 🛠️ Tecnologias utilizadas
-
-- **HTML5**
-- **CSS3**
-- **JavaScript (ES6)**
-- Armazenamento com **localStorage**
-- Manipulação de DOM
-- `addEventListener`, `filter`, `find`, `sort`, `forEach`
-
-## 📚 O que aprendi
-
-- Prática com **JavaScript puro (Vanilla JS)** para manipular elementos na tela
-- Organização de código em funções reutilizáveis
-- Interação com o `localStorage` para salvar dados do usuário
-- Estruturação visual com **CSS Grid** e responsividade
-- Uso de boas práticas com eventos e ordenação de elementos
-
-## 🎓 Contexto
-
-Este projeto foi desenvolvido como parte de um curso de front-end. Embora eu tenha seguido a estrutura proposta pelo instrutor, adaptei partes do código e entendi na prática como aplicar **lógica de programação**, **controle de dados no navegador** e **organização visual com CSS**.
+- Adicionar novas tarefas
+- Fixar/desfixar tarefas
+- Duplicar tarefas
+- Excluir tarefas
+- Buscar por palavras-chave
+- Exportar tarefas em CSV
+- Armazenamento em **Firestore**
+- Feedback visual com **toasts**
+- Interface responsiva e intuitiva
 
 ## 📷 Preview
 
-![Preview do DevNotes](./assets/preview.png)
+![preview do projeto](devNotes.gif)
 
-## 🧑‍💻 Autor
+## 🚀 Tecnologias
 
-**Eric Silva Pereira**  
-[🔗 LinkedIn](https://www.linkedin.com/in/ericsilva001/)  
-[💻 GitHub](https://github.com/EricSilvaPereira)
+- HTML
+- CSS
+- JavaScript (ES Modules)
+- Firebase Firestore
+- Bootstrap Icons
+
+## 📁 Como usar
+
+1. Clone este repositório:
+
+   ```bash
+   git clone https://github.com/SeuUsuario/seu-repo.git
+
+   ```
+
+2. Abra o arquivo index.html no navegador.
