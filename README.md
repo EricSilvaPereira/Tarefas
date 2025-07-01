@@ -31,7 +31,7 @@ Projeto de lista de tarefas com funcionalidades completas, utilizando **JavaScri
 1. Clone este repositório:
 
    ```bash
-   git clone https://github.com/EricSilvaPereira/DevNotes
+   git clone https://github.com/EricSilvaPereira/Tarefas
 
    ```
 
