@@ -1,5 +1,7 @@
 # 📋 TAREFAS
 
+✅ [Acesse o projeto online](https://ericsilvapereira.github.io/Tarefas/)
+
 Projeto de lista de tarefas com funcionalidades completas, utilizando **JavaScript** e **Firebase (Firestore)** para persistência de dados em nuvem.
 
 ## ✨ Funcionalidades
